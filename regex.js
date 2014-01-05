@@ -473,7 +473,7 @@ function suggest(regex) {
 
 	/*
 		setitems  = range
-		             range setitems
+		            range setitems
 	*/
 	function setitems() {
 		var begin = setchar();
@@ -567,6 +567,7 @@ function suggest(regex) {
 		             \r
 		             \t
 		             \0
+		             \b
 		             \ metachar
 
 		Characters in sets have subtle differences to characters elsewhere.
@@ -619,7 +620,9 @@ function suggest(regex) {
 		return c2;
 	}
 
-
+	/* add junk at the start and end of the string if no ^ or $ are present, respectively.
+	   this won't functionally change the suggestion (it will match the regex either way),
+	   but it's a visual indicator that the regex matches a subpattern of any string. */
 	function withTerminators() {
 		// add junk at the start if no terminator
 		var before = peek() === '^' ? constant('') : repeat(oneOf(all));
