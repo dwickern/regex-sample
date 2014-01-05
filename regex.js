@@ -239,6 +239,10 @@ function suggest(regex) {
 				return repeat(p, 0, undefined);
 			} else if (peek() === '+') {
 				accept('+');
+				if (peek() === '?') {
+					// lazy quantifier ignored
+					next();
+				}
 				return repeat(p, 1, undefined);
 			} else if (peek() === '?') {
 				accept('?');
@@ -256,6 +260,10 @@ function suggest(regex) {
 					if (peek() === '}') {
 						// {exact}
 						accept('}');
+						if (peek() === '?') {
+							// lazy quantifier ignored
+							next();
+						}
 						var count = parseInt(min);
 						return repeat(p, count, count);
 					} else if (peek() === ',') {
@@ -267,6 +275,10 @@ function suggest(regex) {
 						if (peek() === '}') {
 							// {min,max}
 							accept('}');
+							if (peek() === '?') {
+								// lazy quantifier ignored
+								next();
+							}
 							return repeat(p, parseInt(min), parseInt(max));
 						} else {
 							// no closing brace for {min,max} expression (this is an error in JS)
