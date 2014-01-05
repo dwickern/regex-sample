@@ -6,7 +6,7 @@ function suggest(regex) {
 	var lower = 'abcdefghijklmnopqrstuvwxyz';
 	var upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var digit = '1234567890';
-	var punct = '][!"#$%&\'()*+,./:;<=>?@\\^_`{|}~-';
+	var punct = range(33, 47) + range(58, 64) + range(91, 96) + range(123, 126);
 	var whitespace = ' \r\t';
 	var alpha = lower + upper;
 	var word = lower + upper + digit + '_';
@@ -90,14 +90,21 @@ function suggest(regex) {
 	function randomInterval(min, max) {
 		return min + Math.floor(Math.random() * (max - min + 1));
 	}
-	/* creates a string with all characters from `begin` to `end`, inclusive */
+	/* creates a string with all characters from `begin` to `end`, inclusive.
+	   accepts ASCII integer or charater value for `begin` and `end`. */
 	function range(begin, end) {
+		function toInt(x) {
+			return isNaN(x - 0) ? x.charCodeAt(0) : x;
+		}
+		begin = toInt(begin);
+		end = toInt(end);
+
 		if (begin > end) {
 			throw error('Range is out of order');
 		}
 
 		var str = '';
-		for (var i = begin.charCodeAt(0); i <= end.charCodeAt(0); ++i) {
+		for (var i = begin; i <= end; ++i) {
 			str += String.fromCharCode(i);
 		}
 		return str;
