@@ -277,7 +277,7 @@ function suggest(regex) {
 	*/
 	function term() {
 		var f = factor();
-		if (more() && peek() !== '|' && peek() !== ')') { // TODO fix [)]
+		if (more() && peek() !== '|' && peek() !== ')') {
 			var next = term();
 			return function() { return f() + next(); }
 		}
