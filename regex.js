@@ -331,6 +331,12 @@ function suggest(regex) {
 		accept('(');
 		if (peek() === '?') {
 			accept('?');
+			switch (peek()) {
+				case '=':
+				case '!':
+				case '<':
+					throw notImplemented('lookaround');
+			}
 			accept(':');
 			var expr = expression();
 			accept(')');
