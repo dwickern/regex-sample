@@ -94,7 +94,7 @@ function suggest(regex) {
 	   accepts ASCII integer or charater value for `begin` and `end`. */
 	function range(begin, end) {
 		function toInt(x) {
-			return isNaN(x - 0) ? x.charCodeAt(0) : x;
+			return typeof x === 'string' ? x.charCodeAt(0) : x;
 		}
 		begin = toInt(begin);
 		end = toInt(end);
