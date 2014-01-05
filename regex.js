@@ -121,8 +121,12 @@ function suggest(regex) {
 	function constant(c) {
 		return function() { return c; }
 	}
-	/* randomly selects one of `values`, where `values` is an array or string */
+	/* randomly selects one of `values`, where `values` is an array, object or string */
 	function oneOf(values) {
+		if (Object.prototype.toString.call(values) === '[object Object]') {
+			// object used as a set, not an array
+			values = Object.keys(values);
+		}
 		return function() { return values[randomInterval(0, values.length - 1)]; }
 	}
 	/* repeats function `f` randomly between [min, max] number of times */
@@ -137,6 +141,48 @@ function suggest(regex) {
 			}
 			return str;
 		}
+	}
+	/* convert an array or string into a set ("set" is just an object) */
+	function arrayToSet(arr) {
+		var result = Object.create(null);
+		for (var i = 0; i < arr.length; ++i) {
+			result[arr[i]] = true;
+		}
+		return result;
+	}
+	/* returns a new set containing the union of the two sets */
+	function setUnion(setA, setB) {
+		var a = Object.keys(setA);
+		var b = Object.keys(setB);
+		var result = Object.create(null);
+		for (var i = 0; i < a.length; ++i) {
+			result[a[i]] = true;
+		}
+		for (var i = 0; i < b.length; ++i) {
+			result[b[i]] = true;
+		}
+		return result;
+	}
+	/* returns a new set containing the values from `A` which are not present in `B` */
+	function setDifference(setA, setB) {
+		var a = Object.keys(setA);
+		var result = Object.create(null);
+		for (var i = 0; i < a.length; ++i) {
+			var key = a[i];
+			if (!(key in setB)) {
+				result[key] = true;
+			}
+		}
+		return result;
+	}
+	/* returns a list of all characters except `values`, where `values` is an array, object or string */
+	function not(values) {
+		if (Object.prototype.toString.call(values) !== '[object Object]') {
+			// convert array and string to object/set
+			values = arrayToSet(values);
+		}
+		var diff = setDifference(arrayToSet(all), values);
+		return Object.keys(diff);
 	}
 
 
@@ -394,17 +440,21 @@ function suggest(regex) {
 		// we are not handling all of these cases
 		accept('[');
 		if (peek() === '^') {
-			throw notImplemented('negated set');
+			accept('^');
+			var negate = true;
 		}
 
-		var options = '';
+		// using a set here ensures an even distribution of choices
+		// even if some values are repeated in the set
+		var options = Object.create(null);
 		while (more() && peek() !== ']') {
-			options += setitems();
+			var items = setitems();
+			options = setUnion(options, arrayToSet(items));
 		}
 
 		accept(']');
 
-		return oneOf(options);
+		return negate ? oneOf(not(options)) : oneOf(options);
 	}
 
 	/*
@@ -462,11 +512,11 @@ function suggest(regex) {
 
 			// meta sequences
 			case 'w': accept('w'); return oneOf(word);
-			case 'W': throw notImplemented('inverse word \\W'); // inverse of \w
+			case 'W': accept('W'); return oneOf(not(word)); // inverse of \w
 			case 'd': accept('d'); return oneOf(digit);
-			case 'D': throw notImplemented('inverse digit \\D'); // inverse of \d
+			case 'D': accept('D'); return oneOf(not(digit)); // inverse of \d
 			case 's': accept('s'); return oneOf(whitespace);
-			case 'S': throw notImplemented('inverse whitespace \\S'); // inverse of \s
+			case 'S': accept('S'); return oneOf(not(whitespace)); // inverse of \s
 			case 'b': throw notImplemented('word boundary \\b'); // word boundary
 			case 'B': throw notImplemented('inverse word boundary \\B'); // inverse of \b
 			case 'u': throw notImplemented('unicode hex \\uFFFF');
@@ -540,11 +590,11 @@ function suggest(regex) {
 
 			// meta sequences
 			case 'w': accept('w'); return word;
-			case 'W': throw notImplemented('inverse word \\W'); // inverse of \w
+			case 'W': accept('W'); return not(word); // inverse of \w
 			case 'd': accept('d'); return digit;
-			case 'D': throw notImplemented('inverse digit \\D'); // inverse of \d
+			case 'D': accept('D'); return not(digit); // inverse of \d
 			case 's': accept('s'); return whitespace;
-			case 'S': throw notImplemented('inverse whitespace \\S'); // inverse of \s
+			case 'S': accept('S'); return not(whitespace); // inverse of \s
 			case 'u': throw notImplemented('unicode hex \\uFFFF');
 			case 'x': throw notImplemented('hex \\xFF');
 			case 'c': throw notImplemented('control character \\cX');
