@@ -3,6 +3,11 @@
 	Returns a random string which matches the regular expression
 */
 function suggest(regex) {
+
+	/*
+		Constants
+	*/
+
 	var lower = 'abcdefghijklmnopqrstuvwxyz';
 	var upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var digit = '1234567890';
@@ -11,6 +16,10 @@ function suggest(regex) {
 	var alpha = lower + upper;
 	var word = lower + upper + digit + '_';
 	var all = lower + upper + digit + punct;
+
+	/*
+		Parser state
+	*/
 
 	var source = regex.source;
 	var pos = 0;
@@ -132,7 +141,7 @@ function suggest(regex) {
 
 
 	/*
-		Parser, using this BNF... roughly
+		Informal recursive descent parser using this BNF, roughly
 
 
 		expression = term
