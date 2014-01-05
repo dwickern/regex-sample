@@ -391,13 +391,27 @@ function suggest(regex) {
 	}
 
 	function start() {
+		// make sure we're at the start of the string
+		// also handle multiple ^^^ at the start
+		for (var i = 0; i <= pos; ++i) {
+			if (source.charAt(i) !== '^') {
+				throw error('Start token can only occur at the start of the expression');
+			}
+		}
 		accept('^');
-		return constant(''); // TODO
+		return constant('');
 	}
 
 	function end() {
+		// make sure we're at the end of the string
+		// also handle multiple $$$ at the end
+		for (var i = pos; i < source.length; ++i) {
+			if (source.charAt(i) !== '$') {
+				throw error('End token can only occur at the end of the expression');
+			}
+		}
 		accept('$');
-		return constant(''); // TODO
+		return constant('');
 	}
 
 	/*
