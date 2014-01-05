@@ -169,8 +169,8 @@ function suggest(regex) {
 		setitems   = range
 		             range setitems
 
-		range      = char
-		             char - char
+		range      = setchar
+		             setchar - setchar
 
 		group      = ( expression )
 		             (?: expression )
@@ -183,6 +183,17 @@ function suggest(regex) {
 		             \t
 		             \0
 		             \ metachar
+		             \ backreference
+
+		setchar    = a .. z
+		             A .. Z
+		             0 .. 9
+		             \n
+		             \r
+		             \t
+		             \0
+		             \ metachar
+
 	*/
 
 
@@ -377,18 +388,14 @@ function suggest(regex) {
 			throw notImplemented('negated set');
 		}
 
-		var options = [];
+		var options = '';
 		while (more() && peek() !== ']') {
-			options.push(setitems());
+			options += setitems();
 		}
 
 		accept(']');
 
-		var choose = oneOf(options);
-		return function() {
-			var choice = choose();
-			return choice();
-		}
+		return oneOf(options);
 	}
 
 	/*
@@ -396,27 +403,17 @@ function suggest(regex) {
 		             range setitems
 	*/
 	function setitems() {
-		// check for meta sequence
-		if (peek() === '\\') {
-			accept('\\');
-			if (peek().match(/[AzwWdDsSbB1-9ux]/)) {
-				// meta sequence
-				backtrack();
-				return char();
-			}
+		var begin = setchar();
 
-			// not a meta sequence, continue as usual
-			backtrack();
-		}
-
-		var begin = char();
-		if (peek() === '-') {
+		// only character literals can be used in a range
+		// a dash following a meta char with multiple choices is treated literally
+		if (begin.length === 1 && peek() === '-') {
 			// character range
 			accept('-');
 
-			var end = char();
-			var choices = range(begin(), end());
-			return oneOf(choices);
+			var end = setchar();
+			var choices = range(begin, end);
+			return choices;
 		}
 		return begin;
 	}
@@ -430,6 +427,7 @@ function suggest(regex) {
 		             \t
 		             \0
 		             \ metachar
+		             \ backreference
 	*/
 	function char() {
 		var c = peek()
@@ -484,6 +482,68 @@ function suggest(regex) {
 		// treat escaped character as a literal
 		accept(c2);
 		return constant(c2)
+	}
+
+	/*
+		A character inside of a set, e.g. [a]
+
+		setchar    = a .. z
+		             A .. Z
+		             0 .. 9
+		             \n
+		             \r
+		             \t
+		             \0
+		             \ metachar
+
+		Characters in sets have subtle differences to characters elsewhere.
+		For example:
+			\1 matches ASCII value 1 instead of a backreference
+			\b matches backspace instead of a word boundary
+			\B matches the literal B instead of an inverse word boundary
+
+		This function also returns the characters themselves instead of a
+		generator function in order to implement inverted sets.
+
+	*/
+	function setchar() {
+		var c = peek()
+		if (c !== '\\') {
+			// character literal
+			accept(c);
+			return c;
+		}
+
+		if (!more()) {
+			// backslash always needs to be followed by something
+			throw expected('escape sequence');
+		}
+
+		accept('\\');
+		var c2 = peek();
+		switch (c2) {
+			// escape sequences
+			case 't': accept('t'); return '\t'; // tab
+			case 'n': accept('n'); return '\n'; // newline
+			case 'r': accept('r'); return '\r'; // carriage return
+			case '0': accept('0'); return '\0'; // nil
+			case 'b': accept('b'); return '\b'; // backspace
+
+			// meta sequences
+			case 'w': accept('w'); return word;
+			case 'W': throw notImplemented('inverse word \\W'); // inverse of \w
+			case 'd': accept('d'); return digit;
+			case 'D': throw notImplemented('inverse digit \\D'); // inverse of \d
+			case 's': accept('s'); return whitespace;
+			case 'S': throw notImplemented('inverse whitespace \\S'); // inverse of \s
+			case 'u': throw notImplemented('unicode hex \\uFFFF');
+			case 'x': throw notImplemented('hex \\xFF');
+			case 'c': throw notImplemented('control character \\cX');
+		}
+
+		// treat escaped character as a literal
+		accept(c2);
+		return c2;
 	}
 
 
