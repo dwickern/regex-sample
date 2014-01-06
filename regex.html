@@ -1,5 +1,60 @@
+<!DOCTYPE HTML>
 <html>
-	<body>
-		<script type="text/javascript" src="regex.js"></script>
-	</body>
+  <head>
+    <title>Regex Sampler</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+      <link rel="stylesheet" href="regex.css">
+  </head>
+  <body>
+    <div id="content" class="container">
+      <div class="header">
+        <h3>Regex Sampler</h3>
+        <h4>Generate some example text which matches a regular expression</h4>
+      </div>
+
+      <div id="regex-container" class="form-group">
+        <div class="input-group">
+          <input id="regex-input" type="text" class="form-control" placeholder="Enter a regular expression">
+          <span class="input-group-btn">
+            <button id="generate-button" class="btn btn-default" type="button">Go</button>
+          </span>
+        </div>
+      </div>
+
+      <div id="error" class="alert alert-danger"></div>
+
+      <div id="results" class="well well-lg">
+        <pre id="success"></pre>
+      </div>
+
+      <div class="examples row">
+        <h4>try some of these</h4>
+        <div class="col-lg-4">
+          <a href="#" data-regex="^[a-zA-Z]\w{3,20}@(gmail\.com|yahoo\.com|hotmail\.com)$">email address</a>
+        </div>
+        <div class="col-lg-4">
+          <a href="#" data-regex="^\(\d{3}\) \d{3}-\d{4}$">phone number</a>
+        </div>
+        <div class="col-lg-4">
+          <a href="#" data-regex="^(?:0[1-9]|1[012])([- \/.])(?:0[1-9]|[12][0-9]|3[01])\1(?:19|20)\d\d$">date</a>
+        </div>
+      </div>
+
+      <div class="examples row">
+        <div class="col-lg-4">
+          <a href="#" data-regex="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$">IP address</a>
+        </div>
+        <div class="col-lg-4">
+        </div>
+        <div class="col-lg-4">
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="regex.js"></script>
+    <script type="text/javascript" src="ui.js"></script>
+  </body>
 </html>

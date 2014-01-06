@@ -1,0 +1,51 @@
+body {
+	background-color: #D2D1D0;
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+pre {
+	border: 0;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
+}
+
+.examples {
+	text-align: center;
+	padding: 6px;
+}
+
+#content {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#regex-container {
+	width: 100%;
+	text-align: center;
+	padding-top: 40px;
+	padding-bottom: 40px;
+}
+
+#regex-input {
+	display: inline;
+	font-family: Consolas, monospace;
+}
+
+#results {
+	text-align: center;
+	min-height: 200px;
+}
+
+#success {
+	font-size: 18px;
+	font-family: Consolas, monospace;
+}
+
+#error {
+	display: none;
+}
